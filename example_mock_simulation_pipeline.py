@@ -283,11 +283,13 @@ class MockSimulationGenerator:
         
         for other_char in self.characters:
             if other_char["id"] != character["id"]:
-                # Simulate relationship evolution
+                # Simulate relationship evolution - safely get nested data
+                rel_data = character.get("relationships", {}).get(other_char["id"], {})
+                start_strength = rel_data.get("strength", 0)
                 change = {
                     "with": other_char["name"],
-                    "start": character["relationships"].get(other_char["id"], {}).get("strength", 0),
-                    "end": character["relationships"].get(other_char["id"], {}).get("strength", 0) + random.uniform(-0.3, 0.3),
+                    "start": start_strength,
+                    "end": start_strength + random.uniform(-0.3, 0.3),
                     "key_moment": random.choice(events)["description"] if events else "No significant moment"
                 }
                 changes.append(change)
@@ -385,10 +387,12 @@ class MockSimulationGenerator:
             for char2 in self.characters:
                 if char1["id"] != char2["id"]:
                     key = f"{char1['id']}_{char2['id']}"
+                    # Safely get relationship data
+                    rel_data = char1.get("relationships", {}).get(char2["id"], {})
                     dynamics[key] = {
                         "characters": [char1["name"], char2["name"]],
-                        "relationship_type": char1["relationships"].get(char2["id"], {}).get("type", "neutral"),
-                        "tension": abs(char1["relationships"].get(char2["id"], {}).get("strength", 0)),
+                        "relationship_type": rel_data.get("type", "neutral"),
+                        "tension": abs(rel_data.get("strength", 0)),
                         "evolution": random.choice(["strengthening", "weakening", "complicated", "stable"]),
                         "key_conflict": self._generate_conflict_point(char1, char2)
                     }
@@ -469,7 +473,7 @@ async def run_full_pipeline_with_mock_data():
     
     mock_generator = MockSimulationGenerator()
     simulation_data = mock_generator.generate_simulation_data(
-        theme=episode_config["themes"][0],
+        theme=episode_config["themes"][0] if episode_config.get("themes") else "ethics vs ambition",
         duration_hours=3.0
     )
     
@@ -553,7 +557,9 @@ async def run_full_pipeline_with_mock_data():
         # Add enhancement details
         if "dramatic_operators" in enhanced_scene:
             operators = enhanced_scene["dramatic_operators"]
-            print(f"     Added: {', '.join(operators) if operators else 'none'}")
+            # Extract operator names from the dictionaries
+            operator_names = [op["name"] for op in operators] if operators else []
+            print(f"     Added: {', '.join(operator_names) if operator_names else 'none'}")
         
         enhanced_scenes.append(enhanced_scene)
     
@@ -623,7 +629,10 @@ async def run_full_pipeline_with_mock_data():
     print(f"\n🎯 Dramatic Elements Applied:")
     all_operators = []
     for scene in episode_data.get("scenes", []):
-        all_operators.extend(scene.get("dramatic_operators", []))
+        # Extract operator names from the dictionaries
+        operators = scene.get("dramatic_operators", [])
+        operator_names = [op["name"] for op in operators]
+        all_operators.extend(operator_names)
     
     from collections import Counter
     operator_counts = Counter(all_operators)
