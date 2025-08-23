@@ -61,6 +61,106 @@ python src/simulation/run_simulation.py --agents 5 --hours 3
 python src/llm/test_prompt_chain.py --test scene
 ```
 
+### Command reference
+
+- **Generate a complete episode (`example_generate_episode.py`)**:
+  - Purpose: End-to-end demo with built-in characters and story; supports full mode (with simulation) and minimal mode (no simulation, faster).
+  - Requirements: `OPENAI_API_KEY` in `.env` or environment; otherwise this script will print an error and exit.
+  - Logs: `logs/episode_generation.log`; add `--debug` to also write `logs/debug.log`.
+  - Output: JSON saved under `output/episodes/`. If the response includes a `screenplay` field, a screenplay `.txt` is also saved.
+  - Usage examples:
+```bash
+# Full demo (with simulation)
+python example_generate_episode.py --mode full
+
+# Fast smoke test (skip simulation + debug logging)
+python example_generate_episode.py --mode minimal --debug
+```
+
+- **Generate with custom parameters (`src/main.py`)**:
+  - Purpose: Primary CLI to generate an episode with your own title, synopsis, themes, genre, tone, characters, and config.
+  - Required: `--title` and `--synopsis`.
+  - Optional:
+    - `--themes <t1> <t2> ...` themes list, default `["drama","conflict","resolution"]`
+    - `--genre {drama,comedy,thriller,sci-fi,mystery}` default `drama`
+    - `--tone {light,balanced,dark,tense,comedic}` default `balanced`
+    - `--simulation-hours <float>` hours to simulate, default `3.0`
+    - `--characters-file <path>` JSON file of character definitions; if omitted, uses built-in test characters
+    - `--config <path>` configuration file for overrides; NOTE: expects JSON for this CLI flag
+    - `--output <path>` output file path, default `episode_output.json`
+    - `--plot-pattern <str>` plot interweaving pattern, default `ABABCAB`
+  - Model fallback: If `OPENAI_API_KEY` is missing, generation falls back to a basic structure without LLM (with a warning).
+  - Usage examples:
+```bash
+# Your original example (uses built-in sample characters)
+python src/main.py \
+  --title "The Algorithm's Edge" \
+  --synopsis "An AI becomes sentient" \
+  --themes "consciousness" "ethics" \
+  --genre sci-fi \
+  --tone tense
+
+# With custom characters and JSON config
+python src/main.py \
+  --title "My Episode" \
+  --synopsis "..." \
+  --themes "ai" "ethics" \
+  --genre sci-fi \
+  --tone tense \
+  --characters-file /absolute/path/characters.json \
+  --config /absolute/path/config.json \
+  --output /absolute/path/out.json
+```
+
+  - Characters file (JSON) example:
+```json
+[
+  {
+    "name": "Alex Chen",
+    "backstory": "Brilliant but conflicted tech founder",
+    "personality": { "openness": 0.9, "conscientiousness": 0.7, "extraversion": 0.6, "agreeableness": 0.5, "neuroticism": 0.6 },
+    "age": 32,
+    "occupation": "CEO"
+  }
+]
+```
+
+- **Run agent simulation only (`src/simulation/run_simulation.py`)**:
+  - Purpose: Run the multi-agent simulation independently of LLM generation; useful to inspect event distribution, tension curve, and narrative peaks.
+  - Options:
+    - `--agents <int>` number of agents to simulate (uses the first N of 5 built-in prototypes)
+    - `--hours <float>` duration in hours
+    - `--timestep <int>` minutes per timestep, default `15`
+    - `--output <path>` output JSON, default `simulation_output.json`
+  - Logs: `simulation.log`; console prints a summary and sample events.
+  - Usage examples:
+```bash
+# 5 agents for 3 hours
+python src/simulation/run_simulation.py --agents 5 --hours 3
+
+# Custom timestep and output
+python src/simulation/run_simulation.py --agents 3 --hours 1.5 --timestep 10 --output /absolute/path/sim.json
+```
+
+- **Test prompt chain (`src/llm/test_prompt_chain.py`)**:
+  - Purpose: Debug and iterate on the LLM prompt chain by stage or end-to-end.
+  - Options:
+    - `--test {scene|outline|episode}` what to test; `scene` runs a single-scene chain, `outline` builds an episode outline, `episode` generates a mini-episode
+    - `--stage {concept_generation|discriminative_refinement|dramatic_enhancement|dialogue_generation}` stage within the scene chain (only applies to `--test scene`)
+    - `--num-scenes <int>` number of scenes when `--test episode` (default `3`)
+  - Models: `scene`/`episode` default to GPT‑3.5; `outline` uses GPT‑4. Requires `OPENAI_API_KEY`.
+  - Usage examples:
+```bash
+# End-to-end single-scene generation
+python src/llm/test_prompt_chain.py --test scene
+
+# Dialogue stage only
+python src/llm/test_prompt_chain.py --test scene --stage dialogue_generation
+
+# Mini-episode with 5 scenes
+python src/llm/test_prompt_chain.py --test episode --num-scenes 5
+```
+
 ## 🏗️ Architecture
 
 The system follows a sophisticated pipeline architecture:
@@ -188,6 +288,38 @@ dramatic_operators:
   min_tension: 0.2
   max_tension: 0.95
 ```
+
+### CLI config overrides (JSON for --config)
+
+When using the CLI flag `--config` with `python src/main.py`, provide a JSON file. This overrides the internal defaults used by the orchestrator. Example:
+```json
+{
+  "generation": {
+    "llm_model": "gpt-4.1",
+    "temperature": 0.7,
+    "max_scenes": 14,
+    "scene_duration_seconds": 90
+  },
+  "simulation": {
+    "time_step_minutes": 15,
+    "default_duration_hours": 3
+  },
+  "dramatic_operators": {
+    "max_per_scene": 3,
+    "min_tension": 0.3,
+    "max_tension": 0.9
+  },
+  "output": {
+    "format": "json",
+    "include_metadata": true,
+    "save_intermediate": true
+  }
+}
+```
+
+Notes:
+- `generation.llm_model` determines the model: contains `"gpt-4.1"` → GPT‑4.1; contains `"gpt-4"` → GPT‑4; otherwise falls back to GPT‑3.5.
+- `config/default_config.yaml` documents typical settings; the `--config` flag specifically expects JSON for the CLI.
 
 ## 📚 Documentation
 

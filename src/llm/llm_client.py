@@ -18,6 +18,12 @@ except ImportError:
 
 class ModelType(Enum):
     """Available model types."""
+    # Latest GPT-4.1 models with 1M context window
+    GPT4_1 = "gpt-4.1"  # Main model: 1M context, 32K output
+    GPT4_1_MINI = "gpt-4.1-mini"  # Faster & cheaper: 1M context
+    GPT4_1_NANO = "gpt-4.1-nano"  # Fastest: 1M context
+    
+    # Legacy models (kept for compatibility)
     GPT4 = "gpt-4-turbo-preview"
     GPT4_VISION = "gpt-4-vision-preview"
     GPT35_TURBO = "gpt-3.5-turbo"
@@ -27,7 +33,7 @@ class ModelType(Enum):
 class LLMClient:
     """Client for interacting with Large Language Models."""
     
-    def __init__(self, api_key: Optional[str] = None, model: ModelType = ModelType.GPT4):
+    def __init__(self, api_key: Optional[str] = None, model: ModelType = ModelType.GPT4_1):
         """Initialize the LLM client.
         
         Args:
@@ -75,14 +81,21 @@ class LLMClient:
         
         for attempt in range(self._retry_count):
             try:
+                # Use maximum parameters for GPT-4.1 models
+                if self.model in [ModelType.GPT4_1, ModelType.GPT4_1_MINI, ModelType.GPT4_1_NANO]:
+                    # GPT-4.1 supports up to 32,768 output tokens
+                    default_max_tokens = 32768 if not max_tokens else min(max_tokens, 32768)
+                else:
+                    # Legacy models have lower limits
+                    default_max_tokens = max_tokens if max_tokens else 4096
+                
                 kwargs = {
                     "model": self.model.value,
                     "messages": messages,
                     "temperature": temperature,
+                    "max_tokens": default_max_tokens
                 }
                 
-                if max_tokens:
-                    kwargs["max_tokens"] = max_tokens
                 if seed is not None:
                     kwargs["seed"] = seed
                 if response_format:

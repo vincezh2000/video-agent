@@ -116,8 +116,8 @@ class PromptChain:
             themes=", ".join(context.themes)
         )
         
-        # Use faster model for concept generation
-        self.llm_client.switch_model(ModelType.GPT35_TURBO)
+        # Use GPT-4.1 for all generation
+        self.llm_client.switch_model(ModelType.GPT4_1)
         
         response = await self.llm_client.generate(
             prompt=prompt,
@@ -144,8 +144,8 @@ class PromptChain:
             previous_scene=json.dumps(context.recent_events[-1] if context.recent_events else {})
         )
         
-        # Switch to better model for evaluation
-        self.llm_client.switch_model(ModelType.GPT4)
+        # Keep using GPT-4.1 for evaluation
+        self.llm_client.switch_model(ModelType.GPT4_1)
         
         response = await self.llm_client.generate(
             prompt=prompt,
@@ -171,18 +171,23 @@ class PromptChain:
         """Stage 3: Apply dramatic operators."""
         template = self.templates.get_template("dramatic_enhancement")
         
+        # GPT-4.1 supports 1M context - no need to truncate
         prompt = template.user.format(
             refined_concept=json.dumps(context.refined_concept, indent=2),
             act_number=context.act_number,
-            plot_threads=json.dumps(context.plot_threads),
-            foreshadowing=json.dumps(context.foreshadowing)
+            plot_threads=json.dumps(context.plot_threads),  # Full context
+            foreshadowing=json.dumps(context.foreshadowing)  # Full context
         )
+        
+        # Use GPT-4.1 for drama enhancement
+        self.llm_client.switch_model(ModelType.GPT4_1)
         
         response = await self.llm_client.generate(
             prompt=prompt,
             system_prompt=template.system,
             temperature=template.temperature,
-            response_format={"type": "json_object"} if template.requires_json else None
+            response_format={"type": "json_object"} if template.requires_json else None,
+            max_tokens=32768  # Use maximum for GPT-4.1
         )
         
         try:
@@ -253,8 +258,8 @@ class PromptChain:
             plotlines=json.dumps(context.plot_threads)
         )
         
-        # Use faster model for coherence check
-        self.llm_client.switch_model(ModelType.GPT35_TURBO)
+        # Use GPT-4.1 for coherence check
+        self.llm_client.switch_model(ModelType.GPT4_1)
         
         response = await self.llm_client.generate(
             prompt=prompt,
@@ -314,7 +319,7 @@ class PromptChain:
             "metadata": {
                 "generated_at": datetime.now().isoformat(),
                 "prompt_chain_version": "1.0",
-                "models_used": ["gpt-3.5-turbo", "gpt-4"]
+                "models_used": ["gpt-4.1"]
             }
         }
         
@@ -452,12 +457,16 @@ class EpisodeChain:
                     foreshadowing=base_context.foreshadowing,
                     established_facts=base_context.established_facts,
                     world_rules=base_context.world_rules,
-                    recent_events=base_context.recent_events[-3:] if base_context.recent_events else []
+                    recent_events=base_context.recent_events  # Full context with GPT-4.1
                 )
                 
                 # Generate the scene
                 scene = await self.scene_chain.run_chain(scene_context)
                 generated_scenes.append(scene)
+                
+                # Minimal delay with GPT-4.1's higher limits
+                if scene_outline["scene_number"] % 5 == 0:
+                    await asyncio.sleep(1)  # Small pause every 5 scenes
                 
                 # Update base context with scene results
                 base_context.recent_events.append({
@@ -465,6 +474,9 @@ class EpisodeChain:
                     "summary": scene_outline.get("summary", ""),
                     "outcome": scene.get("emotional_arc", "")
                 })
+                
+                # GPT-4.1 supports 1M tokens - keep full context
+                # base_context.recent_events already contains all events
                 
                 # Add any new plot threads or foreshadowing
                 if scene_context.foreshadowing:

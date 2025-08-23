@@ -29,9 +29,9 @@ simulation:
       - ["Office", "Server Room"]
 
 generation:
-  llm_model: "gpt-4"
+  llm_model: "gpt-4.1"  # Latest model with 1M context window, 32K output tokens
   temperature: 0.8
-  max_tokens: null
+  max_tokens: 32768  # Maximum output tokens for GPT-4.1
   prompt_chain_stages:
     - concept_generation
     - discriminative_refinement

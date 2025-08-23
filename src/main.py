@@ -92,7 +92,13 @@ class ShowrunnerSystem:
             logger.warning("OPENAI_API_KEY not set. LLM features will be limited.")
         else:
             model_name = self.config["generation"]["llm_model"]
-            model = ModelType.GPT4 if "gpt-4" in model_name else ModelType.GPT35_TURBO
+            # Use GPT-4.1 by default for maximum capability
+            if "gpt-4.1" in model_name:
+                model = ModelType.GPT4_1
+            elif "gpt-4" in model_name:
+                model = ModelType.GPT4
+            else:
+                model = ModelType.GPT35_TURBO
             self.llm_client = LLMClient(api_key=api_key, model=model)
             self.episode_chain = EpisodeChain(self.llm_client)
             
