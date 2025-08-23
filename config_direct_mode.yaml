@@ -1,0 +1,177 @@
+# Configuration for Direct Episode Generation (No Simulation)
+# This mode bypasses the multi-agent simulation and uses predefined characters
+
+mode: direct  # Options: 'simulation', 'direct', 'hybrid'
+
+# Direct Generation Settings
+direct_generation:
+  # Use predefined character templates instead of simulation
+  use_character_templates: true
+  
+  # Skip simulation data collection
+  skip_simulation: true
+  
+  # Faster generation with less complex reasoning
+  fast_mode: true
+
+# Character Templates (used when simulation is skipped)
+character_templates:
+  protagonist:
+    archetypes: ["ambitious", "conflicted", "relatable"]
+    default_goals: 2
+    complexity: medium
+  
+  antagonist:
+    archetypes: ["competitive", "complex", "sympathetic"]
+    default_goals: 2
+    complexity: high
+    
+  mentor:
+    archetypes: ["wise", "flawed", "caring"]
+    default_goals: 1
+    complexity: medium
+    
+  supporting:
+    archetypes: ["loyal", "comic relief", "voice of reason"]
+    default_goals: 1
+    complexity: low
+
+# LLM Configuration for Direct Mode
+llm:
+  # Use faster model for non-critical stages
+  concept_generation:
+    model: gpt-3.5-turbo
+    temperature: 0.8
+    max_tokens: 800
+    
+  plot_structure:
+    model: gpt-3.5-turbo
+    temperature: 0.7
+    max_tokens: 1000
+    
+  scene_generation:
+    model: gpt-3.5-turbo
+    temperature: 0.7
+    max_tokens: 800
+    
+  dialogue_generation:
+    model: gpt-3.5-turbo  # Use gpt-4 for better dialogue
+    temperature: 0.8
+    max_tokens: 1000
+    
+  drama_enhancement:
+    model: gpt-3.5-turbo
+    temperature: 0.9
+    max_tokens: 500
+    
+  final_polish:
+    model: gpt-3.5-turbo
+    temperature: 0.6
+    max_tokens: 800
+
+# Prompt Chain Configuration (Simplified for Direct Mode)
+prompt_chain:
+  stages:
+    - name: concept_generation
+      timeout: 10
+      retries: 2
+      fallback: use_template
+      
+    - name: plot_structure
+      timeout: 10
+      retries: 2
+      validate: true
+      
+    - name: scene_breakdown
+      timeout: 15
+      parallel: true  # Generate multiple scenes in parallel
+      
+    - name: dialogue_generation
+      timeout: 20
+      parallel: true
+      quality_check: true
+      
+    - name: drama_enhancement
+      timeout: 10
+      optional: false  # Always apply drama
+      
+    - name: final_polish
+      timeout: 10
+      optional: true
+
+# Drama Configuration (Simplified)
+drama:
+  operators:
+    enabled: ["reversal", "foreshadowing", "cliffhanger", "callback"]
+    disabled: ["deus_ex_machina", "dream_sequence"]  # Avoid these
+    
+  intensity:
+    act1: low
+    act2: medium
+    act3: high
+    
+  cliffhanger_positions: [3, 6]  # Scene numbers for act breaks
+
+# Episode Structure
+episode:
+  target_duration_minutes: 22
+  scene_count: 8
+  act_structure: "three_act"
+  
+  # Plot patterns for variety
+  plot_patterns:
+    - "ABABC"  # Alternating storylines converging
+    - "AAABBC"  # Main plot focus with subplot
+    - "ABCABC"  # Interweaved multiple threads
+    
+  pacing:
+    opening: fast
+    middle: variable
+    climax: fast
+    resolution: moderate
+
+# Output Configuration
+output:
+  format: json
+  include_metadata: true
+  include_timings: true
+  
+  # Additional outputs
+  generate_summary: true
+  generate_character_sheets: false  # Not needed without simulation
+  generate_audio: false
+  generate_visuals: false
+
+# Performance Settings
+performance:
+  cache_prompts: true
+  batch_api_calls: true
+  max_parallel_calls: 3
+  timeout_seconds: 120
+
+# Fallback Templates (when LLM fails)
+fallback_templates:
+  concept:
+    file: "templates/fallback_concepts.json"
+    random_selection: true
+    
+  dialogue:
+    file: "templates/generic_dialogue.json"
+    character_aware: true
+
+# Quality Thresholds (Relaxed for Direct Mode)
+quality:
+  coherence_threshold: 0.7  # Lower than simulation mode (0.85)
+  character_consistency: 0.7  # Lower than simulation mode (0.8)
+  dialogue_naturalness: 0.65  # Lower than simulation mode (0.75)
+  
+  # Auto-retry if below threshold
+  auto_retry: true
+  max_retries: 2
+
+# Logging
+logging:
+  level: INFO
+  file: "logs/direct_generation.log"
+  include_prompts: false  # Set true for debugging
+  include_responses: false

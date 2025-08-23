@@ -29,8 +29,8 @@ async def generate_sample_episode():
         "themes": ["consciousness", "ethics", "innovation", "responsibility"],
         "genre": "sci-fi",
         "tone": "tense",
-        "simulation_hours": 2.0,  # Shorter for demo
-        "plot_pattern": "ABABCAB"
+        "simulation_hours": 0.05,  # Very short simulation for demo
+        "plot_pattern": "ABAB"  # Shorter pattern for fewer scenes
     }
     
     # Character definitions
@@ -107,17 +107,22 @@ async def generate_sample_episode():
     system = ShowrunnerSystem()
     
     try:
-        # Generate the episode
+        # Generate the episode with a timeout
         logger.info(f"Generating episode: {episode_config['title']}")
-        episode = await system.generate_episode(
-            title=episode_config["title"],
-            synopsis=episode_config["synopsis"],
-            themes=episode_config["themes"],
-            genre=episode_config["genre"],
-            tone=episode_config["tone"],
-            characters=characters,
-            simulation_hours=episode_config["simulation_hours"],
-            plot_pattern=episode_config["plot_pattern"]
+        
+        # Set a timeout for episode generation (5 minutes)
+        episode = await asyncio.wait_for(
+            system.generate_episode(
+                title=episode_config["title"],
+                synopsis=episode_config["synopsis"],
+                themes=episode_config["themes"],
+                genre=episode_config["genre"],
+                tone=episode_config["tone"],
+                characters=characters,
+                simulation_hours=episode_config["simulation_hours"],
+                plot_pattern=episode_config["plot_pattern"]
+            ),
+            timeout=300.0  # 5 minute timeout
         )
         
         # Save the complete episode
@@ -158,6 +163,20 @@ async def generate_sample_episode():
         print(f"\nFull episode saved to: {episode_file}")
         
         return episode
+        
+    except asyncio.TimeoutError:
+        logger.warning("Episode generation timed out after 5 minutes")
+        print("\n⚠️ Episode generation timed out after 5 minutes")
+        print("This is normal for demo purposes - the system was trying to generate many scenes.")
+        print("Partial results have been saved to output/simulation_data.json")
+        return None
+        
+    except Exception as e:
+        logger.error(f"Episode generation failed: {e}")
+        print(f"\n❌ Episode generation failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
         
     finally:
         await system.close()

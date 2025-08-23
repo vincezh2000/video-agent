@@ -171,12 +171,15 @@ class PromptChain:
         """Stage 3: Apply dramatic operators."""
         template = self.templates.get_template("dramatic_enhancement")
         
-        # GPT-4.1 supports 1M context - no need to truncate
+        # Truncate context to avoid rate limits - keep only recent plot threads
+        plot_threads_truncated = context.plot_threads[-5:] if len(context.plot_threads) > 5 else context.plot_threads
+        foreshadowing_truncated = context.foreshadowing[-10:] if len(context.foreshadowing) > 10 else context.foreshadowing
+        
         prompt = template.user.format(
             refined_concept=json.dumps(context.refined_concept, indent=2),
             act_number=context.act_number,
-            plot_threads=json.dumps(context.plot_threads),  # Full context
-            foreshadowing=json.dumps(context.foreshadowing)  # Full context
+            plot_threads=json.dumps(plot_threads_truncated),  # Truncated context
+            foreshadowing=json.dumps(foreshadowing_truncated)  # Truncated context
         )
         
         # Use GPT-4.1 for drama enhancement
@@ -187,7 +190,7 @@ class PromptChain:
             system_prompt=template.system,
             temperature=template.temperature,
             response_format={"type": "json_object"} if template.requires_json else None,
-            max_tokens=32768  # Use maximum for GPT-4.1
+            max_tokens=8192  # Reduced to avoid rate limits
         )
         
         try:
