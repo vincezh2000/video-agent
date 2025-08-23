@@ -1,0 +1,145 @@
+{
+  "characters": [
+    {
+      "name": "Alex Chen",
+      "backstory": "Former Google engineer who left to found an AI startup. Brilliant but sometimes ruthless in pursuit of success. Struggles with balancing innovation and ethics.",
+      "personality": {
+        "openness": 0.9,
+        "conscientiousness": 0.8,
+        "extraversion": 0.7,
+        "agreeableness": 0.4,
+        "neuroticism": 0.6
+      },
+      "age": 32,
+      "occupation": "CEO & CTO",
+      "goals": [
+        {
+          "description": "Secure Series A funding",
+          "priority": 0.9
+        },
+        {
+          "description": "Build AGI before competitors",
+          "priority": 0.8
+        }
+      ],
+      "relationships": {
+        "Jordan Kim": "philosophical opponent but romantic tension",
+        "Sam Rodriguez": "co-founder and friend",
+        "Marcus Webb": "necessary evil for funding"
+      }
+    },
+    {
+      "name": "Jordan Kim",
+      "backstory": "Philosophy PhD who transitioned to tech to ensure AI is developed ethically. Often clashes with profit-driven decisions but deeply believes in the team's potential.",
+      "personality": {
+        "openness": 0.8,
+        "conscientiousness": 0.9,
+        "extraversion": 0.4,
+        "agreeableness": 0.8,
+        "neuroticism": 0.5
+      },
+      "age": 29,
+      "occupation": "Head of Ethics",
+      "goals": [
+        {
+          "description": "Implement comprehensive AI ethics framework",
+          "priority": 0.8
+        },
+        {
+          "description": "Prevent harmful AI deployment",
+          "priority": 0.95
+        }
+      ],
+      "relationships": {
+        "Alex Chen": "attracted but conflicted",
+        "Sam Rodriguez": "mentee relationship",
+        "Marcus Webb": "mutual distrust"
+      }
+    },
+    {
+      "name": "Sam Rodriguez",
+      "backstory": "Young prodigy engineer who believes AI can solve humanity's problems. Sometimes naive about business realities but incredibly talented at implementation.",
+      "personality": {
+        "openness": 0.95,
+        "conscientiousness": 0.6,
+        "extraversion": 0.6,
+        "agreeableness": 0.7,
+        "neuroticism": 0.3
+      },
+      "age": 24,
+      "occupation": "Lead Engineer",
+      "goals": [
+        {
+          "description": "Create breakthrough AI architecture",
+          "priority": 0.85
+        },
+        {
+          "description": "Prove themselves to the team",
+          "priority": 0.7
+        }
+      ],
+      "relationships": {
+        "Alex Chen": "hero worship",
+        "Jordan Kim": "respects wisdom",
+        "Riley Zhang": "friendly rivalry"
+      }
+    },
+    {
+      "name": "Marcus Webb",
+      "backstory": "Billionaire venture capitalist who made fortune in early social media. Sees AI as the next frontier for massive returns. Pressures for aggressive growth and monetization.",
+      "personality": {
+        "openness": 0.5,
+        "conscientiousness": 0.7,
+        "extraversion": 0.8,
+        "agreeableness": 0.3,
+        "neuroticism": 0.4
+      },
+      "age": 45,
+      "occupation": "Venture Capitalist",
+      "goals": [
+        {
+          "description": "10x return on investment",
+          "priority": 0.95
+        },
+        {
+          "description": "Control board decisions",
+          "priority": 0.8
+        }
+      ],
+      "relationships": {
+        "Alex Chen": "useful asset",
+        "Jordan Kim": "obstacle to profits",
+        "Riley Zhang": "potential ally"
+      }
+    },
+    {
+      "name": "Riley Zhang",
+      "backstory": "Stanford MBA with experience at multiple unicorns. Bridges the gap between technical and business teams. Pragmatic but increasingly concerned about the AI's capabilities.",
+      "personality": {
+        "openness": 0.6,
+        "conscientiousness": 0.85,
+        "extraversion": 0.65,
+        "agreeableness": 0.6,
+        "neuroticism": 0.4
+      },
+      "age": 35,
+      "occupation": "COO",
+      "goals": [
+        {
+          "description": "Scale operations efficiently",
+          "priority": 0.8
+        },
+        {
+          "description": "Maintain team cohesion",
+          "priority": 0.75
+        }
+      ],
+      "relationships": {
+        "Alex Chen": "professional respect",
+        "Jordan Kim": "growing appreciation",
+        "Sam Rodriguez": "protective",
+        "Marcus Webb": "wary alliance"
+      }
+    }
+  ]
+}

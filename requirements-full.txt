@@ -1,0 +1,30 @@
+# Full dependencies (includes multi-modal generation)
+-r requirements.txt
+
+# Voice synthesis
+elevenlabs>=0.2.0
+# Alternative: gTTS>=2.3.0 for free option
+
+# Audio processing
+pydub>=0.25.0
+soundfile>=0.12.0
+librosa>=0.10.0
+
+# Video rendering (choose based on needs)
+opencv-python>=4.8.0
+pillow>=10.0.0
+# pygame>=2.5.0  # For basic rendering
+# moviepy>=1.0.3  # For advanced video editing
+
+# Advanced ML (optional)
+torch>=2.0.0  # If using local models
+transformers>=4.30.0  # For Hugging Face models
+
+# Database (for agent memory)
+sqlalchemy>=2.0.0
+aiosqlite>=0.19.0
+
+# Web interface (optional)
+fastapi>=0.100.0
+uvicorn>=0.23.0
+websockets>=11.0

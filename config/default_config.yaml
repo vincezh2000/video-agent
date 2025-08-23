@@ -1,0 +1,77 @@
+# Default configuration for Showrunner Agents system
+
+simulation:
+  time_step_minutes: 15
+  max_agents: 10
+  default_duration_hours: 3
+  world:
+    locations:
+      - name: "Office"
+        description: "A modern open-plan office with glass walls"
+        type: "office"
+        capacity: 20
+      - name: "Conference Room"
+        description: "A meeting room with a large table and projector"
+        type: "office"
+        capacity: 10
+      - name: "Cafeteria"
+        description: "A bright cafeteria with coffee and snacks"
+        type: "public"
+        capacity: 30
+      - name: "Server Room"
+        description: "A cold room filled with humming servers"
+        type: "restricted"
+        capacity: 5
+    connections:
+      - ["Office", "Conference Room"]
+      - ["Office", "Cafeteria"]
+      - ["Conference Room", "Cafeteria"]
+      - ["Office", "Server Room"]
+
+generation:
+  llm_model: "gpt-4"
+  temperature: 0.8
+  max_tokens: null
+  prompt_chain_stages:
+    - concept_generation
+    - discriminative_refinement
+    - dramatic_enhancement
+    - dialogue_generation
+    - coherence_check
+  scene_config:
+    max_scenes: 14
+    scene_duration_seconds: 90
+    target_episode_minutes: 22
+
+dramatic_operators:
+  available:
+    - reversal
+    - foreshadowing
+    - callback
+    - escalation
+    - irony
+    - parallel
+    - cliffhanger
+    - revelation
+    - conflict
+    - complication
+  max_per_scene: 3
+  min_tension: 0.2
+  max_tension: 0.95
+  tension_decay_rate: 0.02
+
+quality_thresholds:
+  character_consistency: 0.8
+  narrative_coherence: 0.85
+  dialogue_naturalness: 0.75
+  minimum_scene_quality: 0.6
+
+output:
+  format: "json"
+  include_metadata: true
+  save_intermediate: true
+  output_directory: "output"
+  file_naming:
+    episode: "{title}_{timestamp}.json"
+    simulation: "simulation_{timestamp}.json"
+    intermediate: "{stage}_{timestamp}.json"
