@@ -283,11 +283,13 @@ class MockSimulationGenerator:
         
         for other_char in self.characters:
             if other_char["id"] != character["id"]:
-                # Simulate relationship evolution
+                # Simulate relationship evolution - safely get nested data
+                rel_data = character.get("relationships", {}).get(other_char["id"], {})
+                start_strength = rel_data.get("strength", 0)
                 change = {
                     "with": other_char["name"],
-                    "start": character["relationships"].get(other_char["id"], {}).get("strength", 0),
-                    "end": character["relationships"].get(other_char["id"], {}).get("strength", 0) + random.uniform(-0.3, 0.3),
+                    "start": start_strength,
+                    "end": start_strength + random.uniform(-0.3, 0.3),
                     "key_moment": random.choice(events)["description"] if events else "No significant moment"
                 }
                 changes.append(change)
