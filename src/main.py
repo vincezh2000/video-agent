@@ -26,6 +26,7 @@ from src.simulation import SimulationEngine
 from src.llm import LLMClient, ModelType
 from src.llm.prompt_chain import EpisodeChain, ChainContext
 from src.drama import DramaEngine
+from src.rendering.episode_audio_renderer import EpisodeAudioRenderer
 
 
 class ShowrunnerSystem:
@@ -42,6 +43,7 @@ class ShowrunnerSystem:
         self.simulation_engine = None
         self.drama_engine = DramaEngine()
         self.episode_chain = None
+        self.audio_renderer = None
         
         # Initialize components
         self._initialize_components()
@@ -107,6 +109,18 @@ class ShowrunnerSystem:
             time_step_minutes=self.config["simulation"]["time_step_minutes"]
         )
         
+        # Initialize audio renderer if API key available
+        elevenlabs_key = os.getenv("ELEVENLABS_API_KEY")
+        if elevenlabs_key:
+            try:
+                self.audio_renderer = EpisodeAudioRenderer(api_key=elevenlabs_key)
+                logger.info("Audio renderer initialized with ElevenLabs")
+            except Exception as e:
+                logger.warning(f"Audio renderer initialization failed: {e}")
+                self.audio_renderer = None
+        else:
+            logger.info("ElevenLabs API key not found. Audio features disabled.")
+        
         logger.info("Showrunner system initialized")
         
     def create_characters_from_config(self, characters_config: list) -> list:
@@ -147,7 +161,9 @@ class ShowrunnerSystem:
         tone: str = "balanced",
         characters: Optional[list] = None,
         simulation_hours: float = 3.0,
-        plot_pattern: str = "ABABCAB"
+        plot_pattern: str = "ABABCAB",
+        generate_audio: bool = False,
+        character_voice_mapping: Optional[Dict[str, str]] = None
     ) -> Dict[str, Any]:
         """Generate a complete episode.
         
@@ -160,6 +176,8 @@ class ShowrunnerSystem:
             characters: Optional list of character configs
             simulation_hours: Hours to simulate
             plot_pattern: Plot interweaving pattern
+            generate_audio: Whether to generate audio for the episode
+            character_voice_mapping: Optional mapping of character names to celebrity voices
             
         Returns:
             Complete episode data
@@ -218,6 +236,37 @@ class ShowrunnerSystem:
             "system_version": "1.0.0",
             "config": self.config
         }
+        
+        # Step 4: Generate audio if requested
+        if generate_audio and self.audio_renderer and episode.get("scenes"):
+            logger.info("Step 4: Generating audio for episode...")
+            try:
+                # Prepare episode data for audio renderer
+                audio_episode_data = {
+                    "episode_id": f"{title.replace(' ', '_').lower()}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                    "title": title,
+                    "characters": characters if characters else [],
+                    "scenes": episode["scenes"]
+                }
+                
+                # Generate audio
+                audio_manifest = await self.audio_renderer.render_full_episode(
+                    episode_data=audio_episode_data,
+                    output_dir="output/audio/episodes",
+                    character_mapping=character_voice_mapping
+                )
+                
+                episode["audio_manifest"] = audio_manifest
+                episode["audio_generated"] = True
+                logger.info(f"Audio generation complete: {audio_manifest['total_duration']:.1f}s total")
+            except Exception as e:
+                logger.error(f"Audio generation failed: {e}")
+                episode["audio_generated"] = False
+                episode["audio_error"] = str(e)
+        else:
+            episode["audio_generated"] = False
+            if not self.audio_renderer:
+                episode["audio_note"] = "Audio renderer not available"
         
         logger.info(f"Episode generation complete in {episode['metadata']['generation_time_seconds']:.1f} seconds")
         return episode

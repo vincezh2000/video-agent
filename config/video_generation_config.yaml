@@ -1,0 +1,134 @@
+# Video Generation Pipeline Configuration
+
+# Visual Style Settings
+visual_style:
+  preset: "tech_noir"  # Options: cinematic, realistic, dramatic, tech_noir
+  custom_style:
+    style_prompt: "cinematic lighting, professional cinematography, high quality"
+    negative_prompt: "cartoon, anime, low quality, distorted"
+    aspect_ratio: "16:9"
+    resolution: [1920, 1080]
+
+# Character Visual Descriptions
+# Add visual descriptions for characters to improve generation quality
+character_visuals:
+  "Alex Chen":
+    description: "Young Asian tech entrepreneur, 30s, professional attire, intelligent look"
+    keywords: ["glasses", "business casual", "confident", "tech founder"]
+    
+  "Sam Rodriguez":
+    description: "Middle-aged Hispanic mentor, 50s, experienced executive, wise appearance"
+    keywords: ["grey hair", "suit", "authoritative", "mentor figure"]
+    
+  "Jordan Park":
+    description: "Ambitious Korean-American rival, 35, sharp dresser, competitive look"
+    keywords: ["stylish", "modern suit", "intense gaze", "competitor"]
+
+# Character to Celebrity Voice Mapping
+character_voices:
+  "Alex Chen": "elon_musk"        # Tech visionary voice
+  "Sam Rodriguez": "trump"         # Business leader voice
+  "Jordan Park": "obama"           # Polished speaker voice
+  # Add more mappings as needed
+
+# Scene Environment Presets
+# Enhance scene descriptions for better background generation
+scene_environments:
+  "The Lab":
+    description: "Modern tech laboratory with blue LED lighting, computer screens, futuristic equipment"
+    atmosphere: "sterile, high-tech, innovative"
+    
+  "Conference Room A":
+    description: "Corporate meeting room with glass walls, large table, city view"
+    atmosphere: "professional, tense, business setting"
+    
+  "Rooftop Garden":
+    description: "Urban rooftop garden at sunset, city skyline background, plants"
+    atmosphere: "peaceful contrast, open air, contemplative"
+    
+  "Alex's Apartment":
+    description: "Modern minimalist apartment, night time, warm lighting, personal space"
+    atmosphere: "intimate, personal, home environment"
+
+# Generation Settings
+generation:
+  # Image Generation
+  image_generation:
+    model: "ideogram-v2"
+    quality: "high"  # Options: draft, standard, high
+    batch_size: 5    # Number of parallel generations
+    
+  # Video Generation
+  video_generation:
+    talking_head_model: "stable-avatar"
+    expression_mapping:
+      neutral: "neutral"
+      happy: "smile"
+      sad: "sad"
+      angry: "angry"
+      anxious: "worried"
+      confident: "confident"
+    
+  # Audio Generation
+  audio_generation:
+    voice_speed: 1.0
+    voice_pitch: 1.0
+    pause_between_lines: 0.5  # seconds
+    
+  # Composition Settings
+  composition:
+    character_size: 0.4  # Relative size of character in scene
+    character_position: "center-bottom"  # Position in frame
+    lighting_match: true  # Match scene lighting
+
+# Output Settings
+output:
+  video_format: "mp4"
+  video_codec: "h264"
+  video_bitrate: "5M"
+  audio_codec: "aac"
+  audio_bitrate: "192k"
+  resolution: "1920x1080"
+  fps: 30
+  
+  # Subtitle Settings
+  generate_subtitles: true
+  subtitle_format: "srt"
+  subtitle_style:
+    font_size: 24
+    color: "white"
+    background: "black"
+    position: "bottom"
+
+# Performance Settings
+performance:
+  max_parallel_tasks: 3
+  api_retry_attempts: 3
+  api_timeout: 120  # seconds
+  cache_enabled: true
+  cleanup_temp_files: true
+  
+# Error Handling
+error_handling:
+  skip_failed_segments: false  # If true, continue even if some segments fail
+  fallback_to_static: true     # Use static image if video generation fails
+  missing_audio_action: "skip" # Options: skip, generate_tts, use_silence
+
+# Advanced Settings
+advanced:
+  # Prompt Engineering
+  prompt_enhancement:
+    auto_enhance: true  # Automatically enhance prompts for better results
+    style_consistency: true  # Ensure visual consistency across scenes
+    
+  # Quality Control
+  quality_control:
+    min_image_quality: 0.7  # Minimum quality score (0-1)
+    regenerate_low_quality: true
+    max_regeneration_attempts: 2
+    
+  # Debug Settings
+  debug:
+    save_intermediate_files: true
+    verbose_logging: false
+    generate_report: true

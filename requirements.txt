@@ -51,6 +51,10 @@ pillow>=10.0.0
 # pygame>=2.5.0  # For basic rendering
 # moviepy>=1.0.3  # For advanced video editing
 
+# Video generation with AI
+fal-client>=0.1.0  # fal.ai API client
+ffmpeg-python>=0.2.0  # FFmpeg wrapper for video processing
+
 # Advanced ML (optional)
 torch>=2.0.0  # If using local models
 transformers>=4.30.0  # For Hugging Face models
